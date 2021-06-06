@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+option go_package = "./;proto";
+import "google/protobuf/empty.proto";
+service EmailSvc {
+    rpc SendVerificationCode(ReceiverInfoRequest) returns (google.protobuf.Empty);
+    rpc VerifyVerificationCode(VerifyCodeRequest) returns (VerifyResponse);
+    rpc SendMarketingEmail(MarketingInfoRequest) returns (google.protobuf.Empty);
+    rpc SendTransactionalEmail(TransactionalInfoRequest) returns (google.protobuf.Empty);
+}
+
+message VerifyResponse {
+    bool match = 1;
+}
+message MarketingInfoRequest {
+    repeated ReceiverInfoRequest emails = 1;
+    int32 templateId = 2;
+}
+message TransactionalInfoRequest {
+    repeated ReceiverInfoRequest emails = 1;
+    int32 templateId = 2;
+}
+message VerifyCodeRequest {
+    string email = 1;
+    string code = 2;
+}
+message ReceiverInfoRequest {
+    string email = 1;
+}
