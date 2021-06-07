@@ -1,0 +1,251 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+option go_package = "./;proto";
+
+service Goods {
+    rpc GoodsList(GoodsFilterRequest) returns(GoodsListResponse);
+    rpc BatchGetGoods(BatchGoodsIdInfo) returns(GoodsListResponse);
+    rpc CreateGoods(CreateGoodsInfo) returns (GoodsInfoResponse);
+    rpc DeleteGoods(DeleteGoodsInfo) returns (google.protobuf.Empty);
+    rpc UpdateGoods(CreateGoodsInfo) returns (google.protobuf.Empty);
+    rpc GetGoodsDetail(GoodInfoRequest) returns(GoodsInfoResponse);
+
+    rpc GetAllCategorysList(google.protobuf.Empty) returns(CategoryListResponse);
+    rpc GetSubCategory(CategoryListRequest) returns(SubCategoryListResponse);
+    rpc CreateCategory(CategoryInfoRequest) returns(CategoryInfoResponse);
+    rpc DeleteCategory(DeleteCategoryRequest) returns(google.protobuf.Empty);
+    rpc UpdateCategory(CategoryInfoRequest) returns(google.protobuf.Empty);
+
+    rpc BrandList(BrandFilterRequest) returns(BrandListResponse);
+    rpc CreateBrand(BrandRequest) returns(BrandInfoResponse);
+    rpc DeleteBrand(BrandRequest) returns(google.protobuf.Empty);
+    rpc UpdateBrand(BrandRequest) returns(google.protobuf.Empty);
+
+    //轮播图
+    rpc BannerList(google.protobuf.Empty) returns(BannerListResponse);
+    rpc CreateBanner(BannerRequest) returns(BannerResponse);
+    rpc DeleteBanner(BannerRequest) returns(google.protobuf.Empty);
+    rpc UpdateBanner(BannerRequest) returns(google.protobuf.Empty);
+
+    //品牌分类
+    rpc CategoryBrandList(CategoryBrandFilterRequest) returns(CategoryBrandListResponse);
+    //通过category获取brands
+    rpc GetCategoryBrandList(CategoryInfoRequest) returns(BrandListResponse);
+    rpc CreateCategoryBrand(CategoryBrandRequest) returns(CategoryBrandResponse);
+    rpc DeleteCategoryBrand(CategoryBrandRequest) returns(google.protobuf.Empty);
+    rpc UpdateCategoryBrand(CategoryBrandRequest) returns(google.protobuf.Empty);
+}
+
+message CategoryListRequest {
+    int32 id = 1;
+    int32 level = 2;
+}
+
+
+message CategoryInfoRequest {
+    int32 id = 1;
+    string name = 2;
+    int32 parent_category = 3;
+    int32 level = 4;
+    bool is_tab = 5;
+}
+
+
+message DeleteCategoryRequest {
+    int32 id = 1;
+}
+
+message QueryCategoryRequest {
+    int32 id = 1;
+    string name = 2;
+}
+
+message CategoryInfoResponse {
+    int32 id = 1;
+    string name = 2;
+    int32 parent_category = 3;
+    int32 level = 4;
+    bool is_tab = 5;
+}
+
+message CategoryListResponse {
+    int32 total = 1;
+    repeated CategoryInfoResponse data = 2;
+    string json_data = 3;
+}
+
+message SubCategoryListResponse {
+    int32 total = 1;
+    CategoryInfoResponse info = 2;
+    repeated CategoryInfoResponse sub_categorys = 3;
+}
+
+
+
+message CategoryBrandFilterRequest {
+    int32 pages = 1;
+    int32 page_per_nums = 2;
+}
+
+message FilterRequest {
+    int32 pages = 1;
+    int32 page_per_nums = 2;
+}
+
+message CategoryBrandRequest {
+    int32 id = 1;
+    int32 category_id = 2;
+    int32 brand_id = 3;
+}
+message CategoryBrandResponse {
+    int32 id = 1;
+    BrandInfoResponse brand = 2;
+    CategoryInfoResponse category = 3;
+}
+
+message BannerRequest {
+    int32 id = 1;
+    int32 index = 2;
+    string image = 3;
+    string url = 4;
+}
+
+message BannerResponse {
+    int32 id = 1;
+    int32 index = 2;
+    string image = 3;
+    string url = 4;
+}
+
+message BrandFilterRequest {
+    int32 pages = 1;
+    int32 page_per_nums = 2;
+}
+
+message BrandRequest {
+    int32 id = 1;
+    string name = 2;
+    string logo = 3;
+}
+
+message BrandInfoResponse {
+    int32 id = 1;
+    string name = 2;
+    string logo = 3;
+}
+
+message BrandListResponse {
+    int32 total = 1;
+    repeated BrandInfoResponse data = 2;
+}
+
+message BannerListResponse {
+    int32 total = 1;
+    repeated BannerResponse data = 2;
+}
+
+message CategoryBrandListResponse {
+    int32 total = 1;
+    repeated CategoryBrandResponse data = 2;
+}
+
+
+
+message BatchGoodsIdInfo {
+    repeated int32 id = 1;
+}
+
+
+message DeleteGoodsInfo {
+    int32 id = 1;
+}
+
+message CategoryBriefInfoResponse {
+    int32 id = 1;
+    string name = 2;
+}
+
+message CategoryFilterRequest {
+    int32 id = 1;
+    bool  is_tab = 2;
+}
+
+message GoodInfoRequest {
+    int32 id = 1;
+}
+
+message CreateGoodsInfo {
+    int32 id = 1;
+    string name = 2;
+    string goods_sn = 3;
+    int32 stocks = 7; //库存，
+    float market_price = 8;
+    float shop_price = 9;
+    string goods_brief = 10;
+    string goods_desc = 11;
+    bool ship_free = 12;
+    repeated string images = 13;
+    repeated string desc_images = 14;
+    string goods_front_image = 15;
+    bool is_new = 16;
+    bool is_hot = 17;
+    bool on_sale = 18;
+    int32 category_id = 19;
+    int32 brand_id = 20;
+}
+
+message GoodsReduceRequest {
+    int32 goods_id = 1;
+    int32 nums = 2;
+}
+
+message BatchCategoryInfoRequest {
+    repeated int32 id = 1;
+    int32 goods_nums = 2;
+    int32 brand_nums = 3;
+}
+
+message GoodsFilterRequest {
+    int32 price_min = 1;
+    int32 price_max = 2;
+    bool  is_hot = 3;
+    bool  is_new = 4;
+    bool  is_tab = 5;
+    int32 top_category = 6;
+    int32 pages = 7;
+    int32 page_per_nums = 8;
+    string key_words = 9;
+    int32 brand = 10;
+}
+
+
+message GoodsInfoResponse {
+    int32 id = 1;
+    int32 category_id = 2;
+    string name = 3;
+    string goods_sn = 4;
+    int32 click_num = 5;
+    int32 sold_num = 6;
+    int32 fav_num = 7;
+    float market_price = 9;
+    float shop_price = 10;
+    string goods_brief = 11;
+    string goods_desc = 12;
+    bool ship_free = 13;
+    repeated string images = 14;
+    repeated string desc_images = 15;
+    string goods_front_image = 16;
+    bool is_new = 17;
+    bool is_hot = 18;
+    bool on_sale = 19;
+    int64 add_time = 20;
+    CategoryBriefInfoResponse category = 21;
+    BrandInfoResponse brand = 22;
+}
+
+message GoodsListResponse {
+    int32 total = 1;
+    repeated GoodsInfoResponse data = 2;
+}

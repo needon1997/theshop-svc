@@ -42,6 +42,6 @@ func InitConnection() (err error) {
 
 	// SetConnMaxLifetime sets the maximum amount of time a connection may be reused.
 	sqlDB.SetConnMaxLifetime(time.Hour)
-	err = DB.AutoMigrate(&Inventory{})
+	err = DB.AutoMigrate(&ShoppingCart{}, &OrderGoods{}, &OrderInfo{})
 	return err
 }
