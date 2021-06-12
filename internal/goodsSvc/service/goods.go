@@ -38,7 +38,7 @@ func (GoodsService) GoodsList(ctx context.Context, in *proto.GoodsFilterRequest)
 	if in.PriceMin != 0 {
 		db = db.Where("shop_price >= ?", in.PriceMin)
 	}
-	if in.PriceMin != 0 {
+	if in.PriceMax != 0 {
 		db = db.Where("shop_price <= ?", in.PriceMax)
 	}
 	c := model.Goods{IsHot: in.IsHot, IsNew: in.IsNew, IsShow: in.IsTab, BrandID: uint(in.Brand)}

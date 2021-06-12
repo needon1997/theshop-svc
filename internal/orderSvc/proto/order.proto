@@ -90,6 +90,6 @@ message OrderInfoDetailResponse {
 }
 
 message OrderStatus {
-    string order_sn = 1;
+    int32 order_id = 1;
     string status = 2;
 }

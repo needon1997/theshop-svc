@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+option go_package = "./;proto";
+
+service Payment {
+    rpc CreatePayment(CreatePaymentRequest) returns (CreatePaymentResponse);
+    rpc ExecutePayment(ExecutePaymentRequest) returns (ExecutePaymentResponse);
+}
+
+message CreatePaymentRequest {
+    int32 order_id = 1;
+    string currency = 2;
+    float total = 3;
+    string token = 4;
+}
+
+message CreatePaymentResponse {
+    string accept_url = 1;
+}
+
+message ExecutePaymentRequest {
+    string payment_id = 1;
+    string payer_id = 2;
+}
+message ExecutePaymentResponse {
+    string msg = 1;
+    string status = 2;
+}

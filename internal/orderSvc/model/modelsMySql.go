@@ -16,10 +16,10 @@ type ShoppingCart struct {
 type OrderInfo struct {
 	gorm.Model
 	UserId      uint    `gorm:"not null"`
-	OrderSn     string  `gorm:"not null;unique;size:30"`
-	Status      string  `gorm:"not null:default:paying"`
+	OrderSn     string  `gorm:"not null;unique;size:60"`
+	Status      string  `gorm:"not null;default:paying"`
 	OrderAmount float32 `gorm:"not null,default:0"`
-	PayAt       time.Time
+	PayAt       *time.Time
 	Address     string `gorm:"size:100;default:default_address"`
 	BuyerName   string `gorm:"size:50:default:default_name"`
 	BuyerMobile string `gorm:"size:15"`

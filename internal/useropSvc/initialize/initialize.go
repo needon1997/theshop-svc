@@ -2,9 +2,7 @@ package initialize
 
 import (
 	"github.com/needon1997/theshop-svc/internal/common"
-	"github.com/needon1997/theshop-svc/internal/common/grpc_client"
-	"github.com/needon1997/theshop-svc/internal/orderSvc/model"
-	"github.com/needon1997/theshop-svc/internal/orderSvc/service"
+	"github.com/needon1997/theshop-svc/internal/useropSvc/model"
 	"go.uber.org/zap"
 )
 
@@ -17,14 +15,6 @@ func Initialization() {
 		zap.S().Errorw("Fail to register to consul", "error", err.Error)
 	}
 	common.PanicIfError(model.InitConnection())
-	service.GoodsSvcConn, err = grpc_client.GetGoodsSvcConn()
-	if err != nil {
-		zap.S().Errorw("Fail to get goods svc connection", "error", err.Error)
-	}
-	service.InventorySvcConn, err = grpc_client.GetInventorySvcConn()
-	if err != nil {
-		zap.S().Errorw("Fail to get inventory goods svc connection", "error", err.Error)
-	}
 }
 
 func Finalize() {
