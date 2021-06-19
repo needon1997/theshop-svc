@@ -5,17 +5,15 @@ import (
 	"fmt"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/google/uuid"
+	"github.com/needon1997/theshop-svc/internal/orderSvc/global"
 	"github.com/needon1997/theshop-svc/internal/orderSvc/model"
 	"github.com/needon1997/theshop-svc/internal/orderSvc/proto"
+	"github.com/needon1997/theshop-svc/internal/orderSvc/sqs"
 	"go.uber.org/zap"
-	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
 )
-
-var GoodsSvcConn *grpc.ClientConn
-var InventorySvcConn *grpc.ClientConn
 
 type OrderService struct {
 	proto.UnimplementedOrderServer
@@ -43,9 +41,6 @@ func (OrderService) CartItemList(ctx context.Context, in *proto.UserInfo) (rsp *
 	}()
 	cartItemList := make([]model.ShoppingCart, 0)
 	panicIfErr("Match User", model.DB.Where("user_id = ?", in.Id).Find(&cartItemList).Error)
-	if len(cartItemList) == 0 {
-		panicIfErr("Match user", gorm.ErrRecordNotFound)
-	}
 	rsp = &proto.CartItemListResponse{}
 	rsp.Total = int32(len(cartItemList))
 	for i := 0; i < int(rsp.Total); i++ {
@@ -121,12 +116,22 @@ func (OrderService) DeleteCartItem(ctx context.Context, in *proto.CartItemReques
 	return
 }
 func (OrderService) CreateOrder(ctx context.Context, in *proto.OrderRequest) (rsp *proto.OrderInfoResponse, err error) {
+	inventoryClient := proto.NewInventoryClient(global.InventorySvcConn)
+	ordersn := uuid.New().String()
+	sellInfo := &proto.SellInfo{OrderSn: ordersn}
+	invReserved := false //a flag indicate whether the inventory is reserved
 	tx := model.DB.Begin()
 	defer func() {
 		tx.Rollback()
 		if r, ok := recover().(error); ok {
 			zap.S().Infow("[CreateOrder]", "[ERROR]:", r.Error())
 			err = r
+			if invReserved {
+				_, err2 := inventoryClient.Reback(context.Background(), sellInfo)
+				if err2 != nil {
+					zap.S().Errorw("[Reback Inventory]", "[ERROR]", err2.Error())
+				}
+			}
 		}
 	}()
 	cartItem := make([]model.ShoppingCart, 0)
@@ -134,7 +139,7 @@ func (OrderService) CreateOrder(ctx context.Context, in *proto.OrderRequest) (rs
 	if len(cartItem) == 0 {
 		panicIfErr("Find Cart Item", gorm.ErrRecordNotFound)
 	}
-	goodsClient := proto.NewGoodsClient(GoodsSvcConn)
+	goodsClient := proto.NewGoodsClient(global.GoodsSvcConn)
 	goodsId := make([]int32, 0)
 	for i := 0; i < len(cartItem); i++ {
 		goodsId = append(goodsId, int32(cartItem[i].GoodsId))
@@ -147,8 +152,6 @@ func (OrderService) CreateOrder(ctx context.Context, in *proto.OrderRequest) (rs
 	for i := 0; i < len(goods.Data); i++ {
 		orderTotal += goods.Data[i].ShopPrice * float32(cartItem[i].Num)
 	}
-	inventoryClient := proto.NewInventoryClient(InventorySvcConn)
-	sellInfo := &proto.SellInfo{}
 	for i := 0; i < len(cartItem); i++ {
 		sellInfo.GoodsInfo = append(sellInfo.GoodsInfo, &proto.GoodsInvInfo{
 			GoodsId: int32(cartItem[i].GoodsId),
@@ -159,9 +162,10 @@ func (OrderService) CreateOrder(ctx context.Context, in *proto.OrderRequest) (rs
 	if err1 != nil {
 		panic(err1)
 	}
+	invReserved = true
 	order := model.OrderInfo{
 		UserId:      uint(in.UserId),
-		OrderSn:     uuid.New().String(),
+		OrderSn:     ordersn,
 		OrderAmount: orderTotal,
 		Address:     in.Address,
 		BuyerName:   in.Name,
@@ -169,7 +173,7 @@ func (OrderService) CreateOrder(ctx context.Context, in *proto.OrderRequest) (rs
 		Note:        in.Note,
 		PayAt:       nil,
 	}
-	panicIfErr("Create Order", model.DB.Create(&order).Error)
+	panicIfErr("Create Order", tx.Create(&order).Error)
 	orderGoodsList := make([]model.OrderGoods, 0)
 	for i := 0; i < len(goodsId); i++ {
 		orderGoodsList = append(orderGoodsList, model.OrderGoods{
@@ -181,8 +185,9 @@ func (OrderService) CreateOrder(ctx context.Context, in *proto.OrderRequest) (rs
 			Num:           cartItem[i].Num,
 		})
 	}
-	panicIfErr("Create Order Goods", model.DB.Create(&orderGoodsList).Error)
-	panicIfErr("Find Cart Item", tx.Where("user_id = ?", in.UserId).Where("checked = ?", true).Delete(&model.ShoppingCart{}).Error)
+	panicIfErr("Create Order Goods", tx.Create(&orderGoodsList).Error)
+	panicIfErr("DeleteCart Item", tx.Where("user_id = ?", in.UserId).Where("checked = ?", true).Delete(&model.ShoppingCart{}).Error)
+	panicIfErr("Send To Timeout Queue", sqs.SendTimeoutOrderMessage(sellInfo))
 	panicIfErr("Commit Change", tx.Commit().Error)
 	rsp = &proto.OrderInfoResponse{
 		Id:      int32(order.ID),
@@ -246,11 +251,11 @@ func (OrderService) OrderDetail(ctx context.Context, in *proto.OrderRequest) (rs
 			err = r
 		}
 	}()
-	order := &model.OrderInfo{}
+	order := model.OrderInfo{}
 	if in.UserId != 0 {
-		panicIfErr("Find Order", model.DB.Where("user_id = ?", in.UserId).Where("id = ?", in.Id).First(&order).Error)
+		panicIfErr("Find Order", model.DB.Where("user_id = ?", in.UserId).Where("order_sn = ?", in.OrderSn).First(&order).Error)
 	} else {
-		panicIfErr("Find Order", model.DB.First(&order, in.Id).Error)
+		panicIfErr("Find Order", model.DB.Where("order_sn = ?", in.OrderSn).First(&order).Error)
 	}
 	orderGoods := make([]model.OrderGoods, 0)
 	panicIfErr("Find OrderGoods", model.DB.Where("order_id = ?", order.ID).Find(&orderGoods).Error)
@@ -289,8 +294,8 @@ func (OrderService) UpdateOrderStatus(ctx context.Context, in *proto.OrderStatus
 			err = r
 		}
 	}()
-	order := &model.OrderInfo{}
-	panicIfErr("Find Order", model.DB.First(&order, in.OrderId).Error)
+	order := model.OrderInfo{}
+	panicIfErr("Find Order", model.DB.Where("order_sn = ?", in.OrderSn).First(&order).Error)
 	order.Status = in.Status
 	panicIfErr("Update Status", model.DB.Save(&order).Error)
 	rsp = &empty.Empty{}

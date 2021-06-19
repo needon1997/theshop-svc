@@ -8,3 +8,8 @@ type Inventory struct {
 	Stocks  uint `gorm:"default:0""`
 	Version uint `gorm:"default:0"`
 }
+
+type InventoryHistory struct {
+	gorm.Model
+	OrderSn string `gorm:"unique;not null"`
+}

@@ -1,9 +1,12 @@
 syntax = "proto3";
-import "google/protobuf/empty.proto";
+
 package proto;
+
+import "google/protobuf/empty.proto";
+
 option go_package = "./;proto";
 
-service Order{
+service Order {
     //购物车
     rpc CartItemList(UserInfo) returns (CartItemListResponse); //获取用户的所有购物车信息
     rpc CreateCartItem(CartItemRequest) returns(ShopCartInfoResponse); //添加商品到购物车
@@ -17,7 +20,7 @@ service Order{
     rpc UpdateOrderStatus(OrderStatus) returns(google.protobuf.Empty); //修改订单的支付状态
 }
 
-message UserInfo{
+message UserInfo {
     int32 id = 1;
 }
 
@@ -41,13 +44,14 @@ message CartItemRequest {
     bool checked = 5;
 }
 
-message OrderRequest{
+message OrderRequest {
     int32 id = 1;
     int32 user_id = 2;
     string address = 3;
     string mobile = 4;
     string name = 5;
     string note = 6;
+    string order_sn = 7;
 }
 
 message OrderInfoResponse {
@@ -90,6 +94,6 @@ message OrderInfoDetailResponse {
 }
 
 message OrderStatus {
-    int32 order_id = 1;
+    string order_sn = 1;
     string status = 2;
 }

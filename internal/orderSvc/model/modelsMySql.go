@@ -17,7 +17,7 @@ type OrderInfo struct {
 	gorm.Model
 	UserId      uint    `gorm:"not null"`
 	OrderSn     string  `gorm:"not null;unique;size:60"`
-	Status      string  `gorm:"not null;default:paying"`
+	Status      string  `gorm:"type:enum('paying', 'canceled', 'approved', 'timeout');not null;default:'paying'"`
 	OrderAmount float32 `gorm:"not null,default:0"`
 	PayAt       *time.Time
 	Address     string `gorm:"size:100;default:default_address"`

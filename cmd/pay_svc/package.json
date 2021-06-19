@@ -1,5 +1,5 @@
 {
-  "name": "pay_api_node_js",
+  "name": "pay_svc",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -9,9 +9,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.21.1",
     "@grpc/grpc-js": "^1.3.2",
     "@grpc/proto-loader": "^0.6.2",
-    "axios": "^0.21.1",
     "google-protobuf": "^3.4.0",
     "lodash.clone": "^4.5.0",
     "lodash.get": "^4.4.2",

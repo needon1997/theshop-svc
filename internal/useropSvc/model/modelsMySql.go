@@ -23,7 +23,7 @@ type UserFav struct {
 
 type UserMessage struct {
 	gorm.Model
-	MessageType string `gorm:"type:enum('note', 'complain', 'inquiry', 'customer service', 'quote');default:'note'"`
+	MessageType string `gorm:"type:enum('note', 'complaint', 'inquiry', 'customer service', 'quote');default:'note'"`
 	Subject     string `gorm:"type:varchar(100);not null"`
 	Content     string `gorm:"not null"`
 	File        string

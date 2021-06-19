@@ -88,6 +88,7 @@ func (InventoryService) Sell(ctx context.Context, in *proto.SellInfo) (rsp *empt
 			panicIfErr("Update Stocks", tx.Save(&inventory).Error)
 		}
 	}
+	panicIfErr("create inventory reserve history", tx.Create(&model.InventoryHistory{OrderSn: in.OrderSn}).Error)
 	panicIfErr("commit change", tx.Commit().Error)
 	rsp = &empty.Empty{}
 	return
@@ -101,12 +102,21 @@ func (InventoryService) Reback(ctx context.Context, in *proto.SellInfo) (rsp *em
 			err = r
 		}
 	}()
+	inventoryHistory := model.InventoryHistory{}
+	err1 := tx.Where("order_sn = ?", in.OrderSn).First(&inventoryHistory).Error
+	if err1 != nil && err1 != gorm.ErrRecordNotFound {
+		panicIfErr("find order reserve history", err1)
+	} else if err1 == gorm.ErrRecordNotFound {
+		rsp = &empty.Empty{}
+		return
+	}
 	for _, goodsInfo := range in.GoodsInfo {
 		inventory := model.Inventory{}
 		panicIfErr("Get Stocks", tx.Where("goods_id = ?", goodsInfo.GoodsId).First(&inventory).Error)
 		inventory.Stocks += uint(goodsInfo.Num)
 		panicIfErr("Update Stocks", tx.Save(&inventory).Error)
 	}
+	panicIfErr("delete inventory reserve history", tx.Delete(&inventoryHistory).Error)
 	panicIfErr("commit change", tx.Commit().Error)
 	rsp = &empty.Empty{}
 	return

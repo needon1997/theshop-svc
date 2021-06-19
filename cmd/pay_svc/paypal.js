@@ -1,4 +1,5 @@
 var paypal = require('paypal-rest-sdk');
+var grpc = require('@grpc/grpc-js');
 paypal.configure({
     mode: 'sandbox', // Sandbox or live
     client_id: 'Ae0yHvemFSEbPxZDn0mwsousvycxXfJIy68bcGl-BdhaLGXYa6Z45rN-9bFKRN09eTkSKiJ0BVnLJ3af',
@@ -6,19 +7,19 @@ paypal.configure({
 });
 module.exports.create = function create_payment(call, callback) {
     console.log("1");
-    var order_id = call.request.order_id;
+    var order_sn = call.request.order_sn;
     var payReq = JSON.stringify({
         intent: 'sale',
         payer: {
             payment_method: 'paypal'
         },
         redirect_urls: {
-            return_url: `http://localhost:10081/o/v1/payment/execute/${order_id}?x-token=${call.request.token}`,
-            cancel_url: `http://localhost:10081/o/v1/order/${order_id}?x-token=${call.request.token}`,
+            return_url: `http://localhost:10081/o/v1/payment/execute/${order_sn}?x-token=${call.request.token}`,
+            cancel_url: `http://localhost:10081/o/v1/order/${order_sn}?x-token=${call.request.token}`,
         },
         transactions: [{
             amount: {
-                total: call.request.total,
+                total: call.request.total/100,
                 currency: call.request.currency,
             },
         }]

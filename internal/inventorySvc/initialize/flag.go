@@ -1,6 +1,8 @@
 package initialize
 
-import "flag"
+import (
+	"flag"
+)
 
 var (
 	ConfigPath *string = new(string)

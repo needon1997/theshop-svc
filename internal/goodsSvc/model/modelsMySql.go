@@ -6,10 +6,10 @@ import (
 
 type Category struct {
 	gorm.Model
-	CategoryName     string `gorm:"not null;size:50"`
-	Level            uint   `gorm:"default:1;not null"`
-	IsShow           bool   `gorm:"default:false"`
-	ParentCategoryID uint   `gorm:"default:null"`
+	CategoryName     string `gorm:"not null;size:50;unique" json:"name"`
+	Level            uint   `gorm:"default:1;not null" json:"level"`
+	IsShow           bool   `gorm:"default:false" json:"is_show"`
+	ParentCategoryID uint   `gorm:"default:null" json:"parent_category_id"`
 }
 type Brand struct {
 	gorm.Model
@@ -24,7 +24,7 @@ type Goods struct {
 	BrandID     uint
 	Brand       Brand
 	IsShow      bool    `gorm:"default:false;not null"`
-	GoodsSn     string  `gorm:"size:50;default:;not null"`
+	GoodsSn     string  `gorm:"size:50;unique;not null"`
 	Name        string  `gorm:"size:100;default:;not null"`
 	ClickNum    uint    `gorm:"default:0"`
 	SoldNum     uint    `gorm:"default:0"`

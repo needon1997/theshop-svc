@@ -5,6 +5,7 @@ import (
 	"github.com/needon1997/theshop-svc/internal/userSvc/model"
 	"github.com/needon1997/theshop-svc/internal/userSvc/proto"
 	"github.com/needon1997/theshop-svc/internal/userSvc/utils"
+	"github.com/opentracing/opentracing-go"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -21,6 +22,7 @@ type UserService struct {
 }
 
 func (this *UserService) GetUserList(ctx context.Context, in *proto.PageInfoRequest) (*proto.UserListInfoResponse, error) {
+	parentSpan := opentracing.SpanFromContext(ctx)
 	rsp := &proto.UserListInfoResponse{}
 	total, err := model.CountUser()
 	if err != nil {
@@ -36,7 +38,9 @@ func (this *UserService) GetUserList(ctx context.Context, in *proto.PageInfoRequ
 	if in.PageSize != 0 {
 		pageSize = in.PageSize
 	}
+	s1 := opentracing.GlobalTracer().StartSpan("db_query", opentracing.ChildOf(parentSpan.Context()))
 	users, err := model.GetUserByOffSetLimit(int(page*pageSize), int(pageSize))
+	s1.Finish()
 	if err != nil {
 		log.Println(err.Error())
 		return nil, status.Error(codes.Internal, err.Error())

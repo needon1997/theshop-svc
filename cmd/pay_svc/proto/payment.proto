@@ -8,9 +8,9 @@ service Payment {
 }
 
 message CreatePaymentRequest {
-    int32 order_id = 1;
+    string order_sn = 1;
     string currency = 2;
-    float total = 3;
+    int32 total = 3;
     string token = 4;
 }
 

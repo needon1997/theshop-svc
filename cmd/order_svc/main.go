@@ -2,11 +2,14 @@ package main
 
 import (
 	"fmt"
+	"github.com/grpc-ecosystem/grpc-opentracing/go/otgrpc"
 	"github.com/needon1997/theshop-svc/internal/common"
 	"github.com/needon1997/theshop-svc/internal/common/config"
 	"github.com/needon1997/theshop-svc/internal/orderSvc/initialize"
 	"github.com/needon1997/theshop-svc/internal/orderSvc/proto"
 	"github.com/needon1997/theshop-svc/internal/orderSvc/service"
+	"github.com/needon1997/theshop-svc/internal/orderSvc/sqs"
+	"github.com/opentracing/opentracing-go"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
@@ -28,9 +31,13 @@ func main() {
 	}
 	var opt []grpc.ServerOption
 	//opt = append(opt, (grpc.UnaryInterceptor(AuthInterceptor)))
+	opt = append(opt, grpc.UnaryInterceptor(otgrpc.OpenTracingServerInterceptor(opentracing.GlobalTracer())))
 	server := grpc.NewServer(opt...)
 	proto.RegisterOrderServer(server, service.OrderService{})
 	grpc_health_v1.RegisterHealthServer(server, health.NewServer())
+	go func() {
+		sqs.PollAndHandleTimeoutOrderMessage()
+	}()
 	go func() {
 		zap.S().Infof("server listen at %s:%v\n", config.ServerConfig.Host, config.ServerConfig.Port)
 		lis, err := net.Listen("tcp", fmt.Sprintf("%s:%v", config.ServerConfig.Host, config.ServerConfig.Port))

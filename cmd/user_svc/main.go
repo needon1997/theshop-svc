@@ -2,11 +2,13 @@ package main
 
 import (
 	"fmt"
+	"github.com/grpc-ecosystem/grpc-opentracing/go/otgrpc"
 	"github.com/needon1997/theshop-svc/internal/common"
 	"github.com/needon1997/theshop-svc/internal/common/config"
 	"github.com/needon1997/theshop-svc/internal/userSvc/initialize"
 	"github.com/needon1997/theshop-svc/internal/userSvc/proto"
 	"github.com/needon1997/theshop-svc/internal/userSvc/service"
+	"github.com/opentracing/opentracing-go"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
@@ -28,6 +30,7 @@ func main() {
 	}
 	var opt []grpc.ServerOption
 	//opt = append(opt, (grpc.UnaryInterceptor(AuthInterceptor)))
+	opt = append(opt, grpc.UnaryInterceptor(otgrpc.OpenTracingServerInterceptor(opentracing.GlobalTracer())))
 	server := grpc.NewServer(opt...)
 	proto.RegisterUserSVCServer(server, &service.UserService{})
 	grpc_health_v1.RegisterHealthServer(server, health.NewServer())

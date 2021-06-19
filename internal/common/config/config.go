@@ -12,6 +12,7 @@ type SeverConfiguration struct {
 	ConsulConfig  ConsulConfiguration      `mapstructure:"consul"`
 	MySqlConfig   MySqlConfiguration       `mapstructure:"mysql"`
 	ServiceConfig ServiceNameConfiguration `mapstructure:"svc_name"`
+	TraceConfig   TracingConfiguration     `mapstructure:"trace"`
 }
 type LogConfiguration struct {
 	LogPath string `mapstructure:"log_path"`
@@ -57,4 +58,9 @@ type ServiceNameConfiguration struct {
 	GoodsServiceName     string `mapstructure:"goods_svc_name"`
 	InventoryServiceName string `mapstructure:"inventory_svc_name"`
 	OrderServiceName     string `mapstructure:"order_svc_name"`
+}
+type TracingConfiguration struct {
+	Name string `mapstructure:"name"`
+	Host string `mapstructure:"host"`
+	Port int    `mapstructure:"port"`
 }
