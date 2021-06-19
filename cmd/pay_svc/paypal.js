@@ -2,8 +2,8 @@ var paypal = require('paypal-rest-sdk');
 var grpc = require('@grpc/grpc-js');
 paypal.configure({
     mode: 'sandbox', // Sandbox or live
-    client_id: 'Ae0yHvemFSEbPxZDn0mwsousvycxXfJIy68bcGl-BdhaLGXYa6Z45rN-9bFKRN09eTkSKiJ0BVnLJ3af',
-    client_secret: 'EBeS0IlvK8Dqk4NCeIlzOqFc8sL--QbdAoMX0e8m2oXuKuTFLlzLNIU7giMvymA8ImrE-9GqhjmRgQQ1'
+    client_id: '',
+    client_secret: ''
 });
 module.exports.create = function create_payment(call, callback) {
     console.log("1");
