@@ -9,7 +9,7 @@ redis:
   expiration: 86400000000
 email:
   username: "weiy3458@gmail.com"
-  password: "1997092224ll"
+  password: ""
   mime: "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";"
   host: "smtp.gmail.com"
   port: "587"
