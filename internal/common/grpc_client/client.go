@@ -5,7 +5,7 @@ import (
 	"fmt"
 	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
 	"github.com/needon1997/theshop-svc/internal/common/config"
-	_ "github.com/needon1997/theshop-svc/internal/common/grpc_consul_resolver"
+	_ "github.com/needon1997/theshop-svc/internal/common/grpc_resolver"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"

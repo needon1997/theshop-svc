@@ -1,4 +1,4 @@
-package grpc_consul_resolver
+package grpc_resolver
 
 import (
 	"context"
@@ -9,10 +9,6 @@ import (
 	"sort"
 	"time"
 )
-
-func init() {
-	resolver.Register(&ConsulBuilder{})
-}
 
 type ConsulBuilder struct {
 }
@@ -60,12 +56,6 @@ func getServices(ctx context.Context, svcChan chan<- []common.Service, target re
 	}
 }
 
-type byAddressString []resolver.Address
-
-func (p byAddressString) Len() int           { return len(p) }
-func (p byAddressString) Less(i, j int) bool { return p[i].Addr < p[j].Addr }
-func (p byAddressString) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
-
 func updateServices(ctx context.Context, svcChan <-chan []common.Service, cc resolver.ClientConn, serviceName string) {
 	for {
 		select {
@@ -83,22 +73,3 @@ func updateServices(ctx context.Context, svcChan <-chan []common.Service, cc res
 		}
 	}
 }
-
-type resolvr struct {
-	cancelFunc context.CancelFunc
-}
-
-// ResolveNow will be skipped due unnecessary in this case
-func (r *resolvr) ResolveNow(resolver.ResolveNowOptions) {}
-
-// Close closes the resolver.
-func (r *resolvr) Close() {
-	r.cancelFunc()
-}
-
-//func main() {
-//	grpc.Dial("consul://localhost:8500/", grpc.WithInsecure())
-//	for {
-//
-//	}
-//}

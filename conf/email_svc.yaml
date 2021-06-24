@@ -1,0 +1,20 @@
+host: "0.0.0.0"
+port: 10090
+name: "email-service"
+log:
+  log_path: "./logs/userSvc.log"
+redis:
+  host: "redis-0.redis.default.svc.cluster.local"
+  port: "6379"
+  expiration: 86400000000
+email:
+  username: "weiy3458@gmail.com"
+  password: "1997092224ll"
+  mime: "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";"
+  host: "smtp.gmail.com"
+  port: "587"
+
+trace:
+  name: "goods-service"
+  host: "127.0.0.1"
+  port: 6831

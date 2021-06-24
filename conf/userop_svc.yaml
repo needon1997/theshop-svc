@@ -1,0 +1,15 @@
+host: "0.0.0.0"
+port: 10090
+name: "userop-service"
+log:
+  log_path: "./logs/useropSvc.log"
+mysql:
+  host: "10.10.240.3"
+  port: "3306"
+  username: "root"
+  password: "1997092224ll"
+  rest_uri: "/theshop?charset=utf8mb4&parseTime=True&loc=Local"
+trace:
+  name: "userop-service"
+  host: "127.0.0.1"
+  port: 6831
